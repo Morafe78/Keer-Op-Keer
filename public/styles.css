@@ -22,10 +22,10 @@ body { margin: 0; background: var(--bg); color: var(--ink); }
 .topbar h1 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 3rem;
+  font-size: 3.4rem;
   font-weight: 800;
   letter-spacing: 1px;
-  background: linear-gradient(180deg, var(--c-yellow), var(--c-orange));
+  background: linear-gradient(180deg, #e0a72e, #d9631f);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;

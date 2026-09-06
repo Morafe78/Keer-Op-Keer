@@ -204,7 +204,7 @@
     const rollerName = game.players.find((p) => p.id === game.currentRollerId)?.name || '?';
     const banner = document.getElementById('turnBanner');
     banner.textContent = isCurrentRoller
-      ? `Roll ${game.rollNumber + 1}: It's your turn to roll!`
+      ? `Roll ${game.rollNumber + 1}: Jouwbeurt/C'est ton tour!`
       : `Roll ${game.rollNumber + 1}: waiting for ${rollerName} to roll…`;
 
     renderDice(isCurrentRoller);
@@ -245,7 +245,7 @@
       if (isCurrentRoller) {
         const btn = document.createElement('button');
         btn.className = 'primary';
-        btn.textContent = 'Roll Dice';
+        btn.textContent = 'Dobbelen/Rouler les dés';
         btn.addEventListener('click', () => socket.emit('roll', {}, (res) => { if (!res.ok) alert(res.error); }));
         diceActions.appendChild(btn);
       }
