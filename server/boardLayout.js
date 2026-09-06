@@ -1,37 +1,46 @@
 // Static, shared layout for the scoreboard. This describes the *board itself*
 // (colours, star cells, printed numbers) - never per-player state. Per-player
-// marks (X/O/etc) live in server/board.js.
+// marks (X/O/etc) live in server/board.js. Because this lives on the server
+// and every client renders from it, all players always see the identical
+// grid - there's no risk of it drifting between players.
 //
-// NOTE: The main colour grid below is a best-effort placeholder reconstructed
-// from a photo of the physical scoreboard, not a guaranteed pixel-perfect
-// transcription (there was no reliable way to verify every single cell's
-// colour/star from the image). It is fully data-driven so it's a quick fix:
-// edit MAIN_GRID_COLOR_AT/MAIN_GRID_STARS below (or replace the generator
-// with a hand-typed 7x15 array) to match your physical card exactly, then
-// restart the server. Everything else on this page (the two number rows,
-// the exclamation row, and the five colour side-columns) was read directly
-// off the photo and should be accurate.
+// The main colour grid below is a hand-transcription from a photo of the
+// physical scoreboard (row by row, column by column, A-O). Exact pixel
+// shades don't matter - only that each cell is clearly one of the five
+// colours (and whether it's a star cell) matching the same cell on the
+// physical card. If you spot a cell that doesn't match your card, just
+// edit its entry below (row index 0-6, column index 0-14 = A-O) and
+// restart the server.
 
 const COLUMN_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'];
 const COLUMNS = COLUMN_LETTERS.length; // 15
 const ROWS = 7;
 
-const COLORS = ['green', 'yellow', 'blue', 'pink', 'orange'];
+// g=green, y=yellow, b=blue, p=pink, o=orange. Suffix "*" marks a star cell.
+const MAIN_GRID_CODES = [
+  ['g', 'g', 'g', 'y', 'y', 'y', 'y', 'g*', 'b', 'b', 'b', 'o*', 'y', 'y', 'y'],
+  ['o', 'g', 'g*', 'g', 'g*', 'y', 'o', 'o', 'p', 'b*', 'b', 'o', 'o', 'g', 'g'],
+  ['b*', 'g', 'p', 'g', 'g', 'g', 'g', 'g*', 'p', 'p', 'p', 'y', 'y', 'o', 'o'],
+  ['b', 'p', 'p', 'g', 'o', 'o*', 'b', 'b', 'g', 'g', 'y', 'y', 'o', 'p*', 'b'],
+  ['p', 'p', 'p', 'p', 'o', 'o', 'p', 'b', 'o', 'g', 'g', 'y', 'y', 'o', 'p'],
+  ['p', 'b*', 'b', 'p*', 'p', 'p', 'p', 'y', 'y*', 'o', 'p*', 'b', 'b', 'b', 'o*'],
+  ['y', 'y', 'y', 'b', 'b', 'b', 'b', 'p', 'y', 'y', 'g', 'g', 'g*', 'o', 'o']
+];
 
-// Deterministic placeholder pattern (see note above) - same every time the
-// server starts, so it's stable to look at and easy to hand-edit.
+const COLOR_CODE_MAP = { g: 'green', y: 'yellow', b: 'blue', p: 'pink', o: 'orange' };
+
 function buildMainGrid() {
-  const grid = [];
-  for (let r = 0; r < ROWS; r++) {
-    const row = [];
-    for (let c = 0; c < COLUMNS; c++) {
-      const color = COLORS[(r + c) % COLORS.length];
-      const star = (r * COLUMNS + c) % 11 === 0;
-      row.push({ color, star });
+  return MAIN_GRID_CODES.map((row, r) => {
+    if (row.length !== COLUMNS) {
+      throw new Error(`MAIN_GRID_CODES row ${r} has ${row.length} entries, expected ${COLUMNS}`);
     }
-    grid.push(row);
-  }
-  return grid;
+    return row.map((code) => {
+      const star = code.endsWith('*');
+      const color = COLOR_CODE_MAP[star ? code.slice(0, -1) : code];
+      if (!color) throw new Error(`Unknown colour code "${code}" in MAIN_GRID_CODES`);
+      return { color, star };
+    });
+  });
 }
 
 // Read directly off the photo (both rows are palindromes).

@@ -469,7 +469,7 @@
     if (!readonly) {
       const note = document.createElement('p');
       note.className = 'assumption-note';
-      note.textContent = 'Colour grid layout is a placeholder reconstruction of the physical board — edit server/boardLayout.js to correct it.';
+      note.textContent = 'Colour grid is transcribed from the physical board — spot a mismatched cell? Edit server/boardLayout.js to fix it for everyone.';
       sideBlock.appendChild(note);
     }
 
