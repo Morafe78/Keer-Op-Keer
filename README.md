@@ -34,14 +34,20 @@ a server redeploy.
 3. The Admin clicks **Start Game** once everyone's in.
 4. Rolling rotates through players in the order they joined. Only the
    current roller can click **Roll Dice** (server generates the roll, so
-   it's genuinely random for everyone).
+   it's genuinely random for everyone). The number die's `?` face and the
+   colour die's black face both show as a white die with a black symbol
+   (`?` and `!`) so black is never confused with Blue's "B".
    - **Rolls 1–3:** all 6 dice (3 number dice: `1,2,3,4,5,?`; 3 colour dice:
      orange/pink/blue/yellow/green/black) are open for everyone to use.
    - **Roll 4 onward:** the roller must first click one number die + one
      colour die and confirm **Set Aside Selected** — those two are reserved
      for them alone. The other 4 dice are then available to everyone else.
-   - The roller clicks **Next Roll** to pass the turn along once everyone's
-     marked their board.
+   - The roller clicks **Gooien/Lancer** to pass the turn along once
+     everyone's marked their board.
+   - Any player can click **Klaar/Terminé** to signal they're done reacting
+     to the current roll — everyone's status (✅/⬜) shows on their name chip,
+     visible to the whole table. It resets automatically as soon as the next
+     roll happens.
 5. Each player marks their own scoreboard by clicking on it — colour cells,
    the two number rows, the `!` row, and the colour side-columns all update
    live and are saved to that player's board only. The score boxes (BONUS,
@@ -49,10 +55,13 @@ a server redeploy.
    yourself, same as on paper.
    - The tab strip above the board lets you peek at any other player's board
      (read-only) — handy for seeing how everyone's doing.
-6. The Admin can **Stop Game** at any time to end it and show a final
-   leaderboard sorted by everyone's typed-in TOTAAL.
-   - There's also a small **Skip stuck turn** admin button, for when
-     whoever's turn it is has gone AFK.
+6. The Admin can **Spel Stoppen** at any time to end the game. Every player
+   immediately sees a full-screen winner celebration (confetti, the winning
+   name in big bold letters, a run of popped-up compliments) for whoever had
+   the highest typed-in TOTAAL at that moment. Clicking anywhere on that
+   screen returns that player to the home page.
+   - There's also a **Beurt overslaan/Passer** admin button next to the roll
+     controls, for when whoever's turn it is has gone AFK.
 
 If your browser tab reloads or you get disconnected mid-game, rejoining the
 same URL automatically reconnects you to your same seat and board (your

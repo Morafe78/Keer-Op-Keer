@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Keer op Keer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -46,8 +49,7 @@
         <div class="game-toolbar">
           <div id="playerStrip" class="player-strip"></div>
           <div class="toolbar-actions">
-            <button id="btnSkip" class="ghost hidden">Skip stuck turn</button>
-            <button id="btnStop" class="danger hidden">Stop Game</button>
+            <button id="btnStop" class="danger hidden">Spel Stoppen</button>
           </div>
         </div>
 
@@ -61,13 +63,17 @@
         <div id="boardContainer" class="board-container"></div>
       </section>
 
-      <!-- Ended -->
+      <!-- Ended: winner celebration screen -->
       <section id="view-ended" class="view hidden">
-        <div class="card">
-          <h2>Game over</h2>
-          <ol id="finalScores" class="final-scores"></ol>
+        <div id="winnerScreen" class="winner-screen">
+          <div class="confetti-layer" id="confettiLayer"></div>
+          <div class="winner-content">
+            <div class="winner-label">🏆 Winnaar / Gagnant 🏆</div>
+            <div class="winner-name" id="winnerName">—</div>
+            <div class="winner-comments" id="winnerComments"></div>
+            <div class="winner-hint">(klik ergens / cliquez n'importe où — home)</div>
+          </div>
         </div>
-        <div id="boardContainerEnded" class="board-container"></div>
       </section>
     </main>
   </div>

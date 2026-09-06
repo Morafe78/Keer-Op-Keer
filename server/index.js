@@ -68,6 +68,7 @@ io.on('connection', (socket) => {
   socket.on('roll', withGame((game) => games.roll(game, socket.data.playerId)));
   socket.on('reserveDice', withGame((game, { dieIds }) => games.reserveDice(game, socket.data.playerId, dieIds)));
   socket.on('nextRoll', withGame((game) => games.nextRoll(game, socket.data.playerId)));
+  socket.on('markDone', withGame((game) => games.markDone(game, socket.data.playerId)));
   socket.on('updateBoard', withGame((game, action) => games.updateBoard(game, socket.data.playerId, action)));
 
   socket.on('disconnect', () => {

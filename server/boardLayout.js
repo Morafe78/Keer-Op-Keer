@@ -19,12 +19,12 @@ const ROWS = 7;
 // g=green, y=yellow, b=blue, p=pink, o=orange. Suffix "*" marks a star cell.
 const MAIN_GRID_CODES = [
   ['g', 'g', 'g', 'y', 'y', 'y', 'y', 'g*', 'b', 'b', 'b', 'o*', 'y', 'y', 'y'],
-  ['o', 'g', 'g*', 'g', 'g*', 'y', 'o', 'o', 'p', 'b*', 'b', 'o', 'o', 'g', 'g'],
-  ['b*', 'g', 'p', 'g', 'g', 'g', 'g', 'g*', 'p', 'p', 'p', 'y', 'y', 'o', 'o'],
+  ['o', 'g', 'y*', 'g', 'y*', 'y', 'o', 'o', 'p', 'b*', 'b', 'o', 'o', 'g', 'g'],
+  ['b*', 'g', 'p', 'g', 'g', 'g', 'g', 'p', 'p', 'p', 'y', 'y', 'o', 'g', 'g'],
   ['b', 'p', 'p', 'g', 'o', 'o*', 'b', 'b', 'g', 'g', 'y', 'y', 'o', 'p*', 'b'],
-  ['p', 'p', 'p', 'p', 'o', 'o', 'p', 'b', 'o', 'g', 'g', 'y', 'y', 'o', 'p'],
+  ['p', 'o', 'o', 'o', 'o', 'o', 'p', 'b', 'o', 'g', 'g', 'y', 'y', 'o', 'p'],
   ['p', 'b*', 'b', 'p*', 'p', 'p', 'p', 'y', 'y*', 'o', 'p*', 'b', 'b', 'b', 'o*'],
-  ['y', 'y', 'y', 'b', 'b', 'b', 'b', 'p', 'y', 'y', 'g', 'g', 'g*', 'o', 'o']
+  ['y', 'y', 'b*', 'b', 'b', 'b', 'p', 'y', 'y', 'y', 'g', 'g', 'g*', 'o', 'o']
 ];
 
 const COLOR_CODE_MAP = { g: 'green', y: 'yellow', b: 'blue', p: 'pink', o: 'orange' };

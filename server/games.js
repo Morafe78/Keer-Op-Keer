@@ -29,6 +29,7 @@ function createGame(adminName) {
     name: adminName,
     isAdmin: true,
     connected: true,
+    done: false,
     board: createBoard()
   };
   const game = {
@@ -41,6 +42,7 @@ function createGame(adminName) {
     dice: null,
     rolledThisTurn: false,
     reservedDice: [], // die ids reserved this turn (roll >= RESERVE_FROM_ROLL)
+    winner: null,
     createdAt: Date.now()
   };
   games.set(code, game);
@@ -80,6 +82,7 @@ function joinGame(code, name, token) {
     name: name.trim().slice(0, 24),
     isAdmin: false,
     connected: true,
+    done: false,
     board: createBoard()
   };
   game.players.push(player);
@@ -109,12 +112,26 @@ function startGame(game, playerId) {
   game.dice = null;
   game.rolledThisTurn = false;
   game.reservedDice = [];
+  game.winner = null;
+  game.players.forEach((p) => { p.done = false; });
 }
 
 function stopGame(game, playerId) {
   requireAdmin(game, playerId);
   if (game.status !== 'active') throw new Error('Game is not active.');
   game.status = 'ended';
+  game.winner = computeWinner(game);
+}
+
+function computeWinner(game) {
+  let best = null;
+  for (const p of game.players) {
+    const total = Number(p.board.scores.total) || 0;
+    if (!best || total > best.total) {
+      best = { id: p.id, name: p.name, total };
+    }
+  }
+  return best;
 }
 
 function skipTurn(game, playerId) {
@@ -132,6 +149,14 @@ function roll(game, playerId) {
   game.rolledThisTurn = true;
   game.reservedDice = [];
   game.rollNumber += 1;
+  game.players.forEach((p) => { p.done = false; });
+}
+
+function markDone(game, playerId) {
+  if (game.status !== 'active') throw new Error('Game is not active.');
+  const player = game.players.find((p) => p.id === playerId);
+  if (!player) throw new Error('Player not found.');
+  player.done = !player.done;
 }
 
 function reserveDice(game, playerId, dieIds) {
@@ -195,6 +220,7 @@ function publicState(game) {
       name: p.name,
       isAdmin: p.isAdmin,
       connected: p.connected,
+      done: p.done,
       board: p.board
     })),
     turnOrder: game.turnOrder,
@@ -204,7 +230,8 @@ function publicState(game) {
     rolledThisTurn: game.rolledThisTurn,
     reservedDice: game.reservedDice,
     reserveFromRoll: RESERVE_FROM_ROLL,
-    maxPlayers: MAX_PLAYERS
+    maxPlayers: MAX_PLAYERS,
+    winner: game.winner
   };
 }
 
@@ -220,6 +247,7 @@ module.exports = {
   reserveDice,
   nextRoll,
   updateBoard,
+  markDone,
   markDisconnected,
   publicState
 };

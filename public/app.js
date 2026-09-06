@@ -81,12 +81,6 @@
       if (!res.ok) alert(res.error);
     });
   });
-  document.getElementById('btnSkip').addEventListener('click', () => {
-    socket.emit('skipTurn', {}, (res) => {
-      if (!res.ok) alert(res.error);
-    });
-  });
-
   // ---------- Socket state ----------
   socket.on('state', (g) => {
     game = g;
@@ -184,7 +178,6 @@
     const isCurrentRoller = self && self.id === game.currentRollerId;
 
     document.getElementById('btnStop').classList.toggle('hidden', !isAdmin);
-    document.getElementById('btnSkip').classList.toggle('hidden', !isAdmin);
 
     // Player strip
     const strip = document.getElementById('playerStrip');
@@ -194,7 +187,16 @@
       chip.className = 'player-chip';
       if (p.id === game.currentRollerId) chip.classList.add('current-roller');
       if (!p.connected) chip.classList.add('disconnected');
-      chip.textContent = p.name + (p.isAdmin ? ' 👑' : '');
+      const label = document.createElement('span');
+      label.textContent = p.name + (p.isAdmin ? ' 👑' : '');
+      chip.appendChild(label);
+      if (game.dice) {
+        const status = document.createElement('span');
+        status.className = 'chip-status';
+        status.textContent = p.done ? '✅' : '⬜';
+        status.title = p.done ? 'Klaar / Terminé' : 'Nog niet klaar / Pas encore terminé';
+        chip.appendChild(status);
+      }
       strip.appendChild(chip);
     });
 
@@ -215,7 +217,25 @@
     renderBoard(document.getElementById('boardContainer'), viewedPlayer.board, { readonly });
   }
 
+  // Number die "?" and colour die "black" both render as a white die with a
+  // black symbol - black would otherwise show as the letter "B", identical
+  // to Blue.
+  function dieDisplay(die) {
+    if (die.kind === 'number' && die.value === '?') {
+      return { text: '?', className: 'special', title: 'Number: ? (wild)' };
+    }
+    if (die.kind === 'color' && die.value === 'black') {
+      return { text: '!', className: 'special', title: 'Colour: black' };
+    }
+    if (die.kind === 'number') {
+      return { text: die.value, className: 'number', title: `Number: ${die.value}` };
+    }
+    return { text: die.value[0].toUpperCase(), className: `color-${die.value}`, title: `Colour: ${die.value}` };
+  }
+
   function renderDice(isCurrentRoller) {
+    const self = me();
+    const isAdmin = self && self.isAdmin;
     const diceArea = document.getElementById('diceArea');
     const diceActions = document.getElementById('diceActions');
     diceArea.innerHTML = '';
@@ -229,6 +249,7 @@
         btn.addEventListener('click', () => socket.emit('roll', {}, (res) => { if (!res.ok) alert(res.error); }));
         diceActions.appendChild(btn);
       }
+      appendSkipButton(diceActions, isAdmin);
       return;
     }
 
@@ -237,10 +258,11 @@
     const reservingNow = isCurrentRoller && needsReserve && !alreadyReserved;
 
     game.dice.forEach((die) => {
+      const display = dieDisplay(die);
       const el = document.createElement('div');
-      el.className = `die ${die.kind === 'number' ? 'number' : 'color-' + die.value}`;
-      el.textContent = die.kind === 'number' ? die.value : die.value[0].toUpperCase();
-      el.title = die.kind === 'number' ? `Number: ${die.value}` : `Colour: ${die.value}`;
+      el.className = `die ${display.className}`;
+      el.textContent = display.text;
+      el.title = display.title;
 
       const isReserved = game.reservedDice.includes(die.id);
       if (isReserved) {
@@ -275,13 +297,10 @@
         });
       });
       diceActions.appendChild(confirmBtn);
-      return;
-    }
-
-    if (isCurrentRoller) {
+    } else if (isCurrentRoller) {
       const nextBtn = document.createElement('button');
       nextBtn.className = 'primary';
-      nextBtn.textContent = 'Next Roll';
+      nextBtn.textContent = 'Gooien/Lancer';
       nextBtn.addEventListener('click', () => socket.emit('nextRoll', {}, (res) => { if (!res.ok) alert(res.error); }));
       diceActions.appendChild(nextBtn);
     } else {
@@ -290,6 +309,27 @@
       info.textContent = 'Mark your board, then wait for the roller to move to the next roll.';
       diceActions.appendChild(info);
     }
+
+    appendSkipButton(diceActions, isAdmin);
+    appendDoneButton(diceActions, self);
+  }
+
+  function appendSkipButton(diceActions, isAdmin) {
+    if (!isAdmin) return;
+    const skipBtn = document.createElement('button');
+    skipBtn.className = 'ghost';
+    skipBtn.textContent = 'Beurt overslaan/Passer';
+    skipBtn.addEventListener('click', () => socket.emit('skipTurn', {}, (res) => { if (!res.ok) alert(res.error); }));
+    diceActions.appendChild(skipBtn);
+  }
+
+  function appendDoneButton(diceActions, self) {
+    if (!self || !game.dice) return;
+    const doneBtn = document.createElement('button');
+    doneBtn.className = self.done ? 'primary' : 'ghost';
+    doneBtn.textContent = self.done ? '✓ Klaar/Terminé' : 'Klaar/Terminé';
+    doneBtn.addEventListener('click', () => socket.emit('markDone', {}, (res) => { if (!res.ok) alert(res.error); }));
+    diceActions.appendChild(doneBtn);
   }
 
   function toggleDieSelection(die) {
@@ -320,25 +360,60 @@
     });
   }
 
+  const WINNER_COMMENTS = [
+    'Wil je een sticker?',
+    'Kijk nou, je kan het wél!',
+    'Ah, miracle, tu as gagné !',
+    'Is je leegte nu gevuld?',
+    'Est-ce que ça comble le vide en toi ?',
+    "Va toucher de l'herbe"
+  ];
+  const CONFETTI_COLORS = ['var(--c-orange)', 'var(--c-yellow)', 'var(--c-pink)', 'var(--c-blue)', 'var(--c-green)'];
+
   function renderEnded() {
     document.getElementById('btnStop').classList.add('hidden');
-    document.getElementById('btnSkip').classList.add('hidden');
 
-    const list = document.getElementById('finalScores');
-    list.innerHTML = '';
-    const ranked = [...game.players].sort((a, b) => (Number(b.board.scores.total) || 0) - (Number(a.board.scores.total) || 0));
-    ranked.forEach((p) => {
-      const li = document.createElement('li');
-      const total = p.board.scores.total === '' ? '—' : p.board.scores.total;
-      li.textContent = `${p.name}: ${total}`;
-      list.appendChild(li);
+    const winner = game.winner;
+    document.getElementById('winnerName').textContent = winner ? winner.name : '—';
+
+    spawnConfetti(document.getElementById('confettiLayer'));
+    renderWinnerComments(document.getElementById('winnerComments'));
+
+    const screen = document.getElementById('winnerScreen');
+    screen.onclick = () => {
+      clearSession();
+      game = null;
+      myPlayerId = null;
+      myToken = null;
+      viewingPlayerId = null;
+      render();
+    };
+  }
+
+  function renderWinnerComments(container) {
+    container.innerHTML = '';
+    WINNER_COMMENTS.forEach((text, i) => {
+      const el = document.createElement('div');
+      el.className = 'winner-comment';
+      el.textContent = text;
+      el.style.animationDelay = `${0.4 + i * 0.6}s`;
+      container.appendChild(el);
     });
+  }
 
-    if (!viewingPlayerId || !game.players.some((p) => p.id === viewingPlayerId)) {
-      viewingPlayerId = myPlayerId;
+  function spawnConfetti(container) {
+    container.innerHTML = '';
+    const count = 90;
+    for (let i = 0; i < count; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = `${Math.random() * 100}%`;
+      piece.style.background = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+      piece.style.animationDuration = `${2.5 + Math.random() * 2.5}s`;
+      piece.style.animationDelay = `${Math.random() * 3}s`;
+      piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+      container.appendChild(piece);
     }
-    const viewedPlayer = game.players.find((p) => p.id === viewingPlayerId);
-    renderBoard(document.getElementById('boardContainerEnded'), viewedPlayer.board, { readonly: true });
   }
 
   // ---------- Board rendering (shared by game + ended views) ----------
