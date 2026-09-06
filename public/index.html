@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Keer op Keer</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <h1>🎲 Keer op Keer</h1>
+      <div id="roomBadge" class="room-badge hidden"></div>
+    </header>
+
+    <main id="views">
+      <!-- Landing -->
+      <section id="view-landing" class="view">
+        <div class="card">
+          <h2>Create a game</h2>
+          <label>Your name<input id="createName" maxlength="24" placeholder="e.g. Emily" /></label>
+          <button id="btnCreate" class="primary">Create Game</button>
+        </div>
+        <div class="card">
+          <h2>Join a game</h2>
+          <label>Room code<input id="joinCode" maxlength="4" placeholder="e.g. F7K2" style="text-transform:uppercase" /></label>
+          <label>Your name<input id="joinName" maxlength="24" placeholder="e.g. Sam" /></label>
+          <button id="btnJoin" class="primary">Join Game</button>
+        </div>
+        <p id="landingError" class="error hidden"></p>
+      </section>
+
+      <!-- Lobby -->
+      <section id="view-lobby" class="view hidden">
+        <div class="card">
+          <h2>Waiting for players…</h2>
+          <p>Share this room code with your friends: <strong id="lobbyCode">----</strong></p>
+          <ul id="lobbyPlayers" class="player-list"></ul>
+          <button id="btnStart" class="primary hidden">Start Game</button>
+          <p id="lobbyHint" class="hint"></p>
+        </div>
+      </section>
+
+      <!-- Game -->
+      <section id="view-game" class="view hidden">
+        <div class="game-toolbar">
+          <div id="playerStrip" class="player-strip"></div>
+          <div class="toolbar-actions">
+            <button id="btnSkip" class="ghost hidden">Skip stuck turn</button>
+            <button id="btnStop" class="danger hidden">Stop Game</button>
+          </div>
+        </div>
+
+        <div id="turnBanner" class="turn-banner"></div>
+
+        <div class="dice-area" id="diceArea"></div>
+        <div class="dice-actions" id="diceActions"></div>
+
+        <div class="board-tabs" id="boardTabs"></div>
+
+        <div id="boardContainer" class="board-container"></div>
+      </section>
+
+      <!-- Ended -->
+      <section id="view-ended" class="view hidden">
+        <div class="card">
+          <h2>Game over</h2>
+          <ol id="finalScores" class="final-scores"></ol>
+        </div>
+        <div id="boardContainerEnded" class="board-container"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
